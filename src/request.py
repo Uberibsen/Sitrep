@@ -27,7 +27,7 @@ class API:
         url_get = str(f"{api}{base_url}")
         enlistments, warden_casualties, colonial_casualties = ([] for i in range(3))
 
-        with open('Sitrep\constants\maps.json', 'r') as map_file:
+        with open('constants\maps.json', 'r') as map_file:
             hexes = json.load(map_file)
             for maphex in hexes:
                 hex_url = str(f"{url_get}{maphex}")
@@ -42,3 +42,6 @@ class API:
                 colonial_casualties.append(hex_response['colonialCasualties'])
             days_at_war = hex_response['dayOfWar']
         return days_at_war, sum(enlistments), sum(warden_casualties), sum(colonial_casualties)
+    
+    def get_hex_info(api, hex):
+        return hex_info
