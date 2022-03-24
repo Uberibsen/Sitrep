@@ -13,7 +13,6 @@ class API:
     def get_war_report(api):
         base_url = "/worldconquest/war"
         url_get = str(f"{api}{base_url}")
-        print(url_get)
         response = urllib.request.urlopen(url_get)
         if(response.getcode() == 200):
             data = response.read()
