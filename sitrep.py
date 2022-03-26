@@ -2,7 +2,7 @@ import discord, json, os
 from dotenv import load_dotenv
 from discord.ext import commands
 from src.request import API
-from src.compare import Comparison
+from src.compare import Hexagon
 
 load_dotenv()
 
@@ -37,15 +37,24 @@ async def report(ctx):
     await ctx.send(embed=embed)
 
 @bot.command(name = "hex")
-async def hex(ctx, hex_name, *type):   
+async def hex(ctx, hex_name):   
     with open("constants\shards.json", "r") as api_url:
         data = json.load(api_url)
         api = data['shards'][0]['url']  
-        hex_name = Comparison.hex_names(hex_name)
+        hex_name = Hexagon.search_hex_name(hex_name)
         if hex_name:
-            await ctx.send(f'Hex identified: {hex_name}.\nGathering intel...')
+            full_hex_name = Hexagon.split_hex_name(hex_name)
+            await ctx.send(f'Hex identified: {full_hex_name}.\nGathering intel...')
+            enlistments, warden_casualties, colonial_casualties = API.get_hex_info(api, hex_name)
         else:
             raise commands.BadArgument()
+    # Embed formatting
+    embed=discord.Embed(title=f"{full_hex_name} status report", description="Amount of casualties, enlistments and war duration")
+    embed.add_field(name="Enlistments", value=str("{:,}".format(enlistments)), inline=False)
+    embed.add_field(name="Colonials", value=str("{:,}".format(colonial_casualties)), inline=True)
+    embed.add_field(name="Wardens", value=str("{:,}".format(warden_casualties)), inline=True)
+    embed.set_footer(text="End of report")
+    await ctx.send(embed=embed)
 
 # Error handling
 @bot.event
@@ -64,7 +73,6 @@ async def on_command_error(ctx, error):
         message = "Something about your input was wrong, please check your input and try again!"
     else:
         message = "Oh no! Something went wrong while running the command!"
-
     await ctx.send(message, delete_after = 5)
 
 bot.run(token)

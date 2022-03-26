@@ -1,20 +1,11 @@
 import urllib.request, json, requests
 
 class API:
-    def get_data(self, api):
-        response = requests.get(f"{api}")
-        if response.status_code == 200:
-            print("200")
-            self.formatted_print(response.json())
-        else:
-            print(
-                f"Error: {response.status_code}")
-
     def get_war_report(api):
         base_url = "/worldconquest/war"
         url_get = str(f"{api}{base_url}")
         response = urllib.request.urlopen(url_get)
-        if(response.getcode() == 200):
+        if (response.getcode() == 200):
             data = response.read()
             report = json.loads(data)
         else:
@@ -31,7 +22,7 @@ class API:
             for maphex in hexes:
                 hex_url = str(f"{url_get}{maphex}")
                 response = urllib.request.urlopen(hex_url)
-                if(response.getcode() == 200):
+                if (response.getcode() == 200):
                     data = response.read()
                     hex_response = json.loads(data)
                 else:
@@ -41,3 +32,18 @@ class API:
                 colonial_casualties.append(hex_response['colonialCasualties'])
             days_at_war = hex_response['dayOfWar']
         return days_at_war, sum(enlistments), sum(warden_casualties), sum(colonial_casualties)
+        
+    def get_hex_info(api, hex_name):
+        base_url = '/worldconquest/warReport/'
+        url_get = str(f"{api}{base_url}{hex_name}")
+
+        response = urllib.request.urlopen(url_get)
+        if (response.getcode() == 200):
+            data = response.read()
+            hex_response = json.loads(data)
+        else:
+            print("Error occured: ", response.getcode())
+        enlistments = hex_response['totalEnlistments']
+        warden_casualties = hex_response['wardenCasualties']
+        colonial_casualties = hex_response['colonialCasualties']
+        return enlistments, warden_casualties, colonial_casualties
