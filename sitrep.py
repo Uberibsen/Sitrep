@@ -13,8 +13,8 @@ bot = commands.Bot(command_prefix = os.getenv('PREFIX'), help_command=None, case
 async def on_ready():
     print(f'{bot.user} reporting for duty!')
 
-@bot.command(name = "test")
-async def test(ctx):
+@bot.command(name = "ping")
+async def ping(ctx):
     await ctx.send(f'{bot.user} is online!')
 
 @bot.command(name = "report")
@@ -74,6 +74,17 @@ async def captures(ctx, hex_name):
             raise commands.CommandError()
         territory = API.get_captured_structures(api, hex_name)
         warden_icons, colonial_icons = Hexagon.decipher_icon_type(territory)
+
+    embed=discord.Embed(title=f"{full_hex_name} - Wardens", description=f'Amount of captured/constructed structures by the Wardens in {full_hex_name}')
+    for k,v in warden_icons.items():
+        embed.add_field(name=f'{k}', value=v, inline=True)
+    await ctx.send(embed=embed)
+
+    embed=discord.Embed(title=f"{full_hex_name} - Colonials", description=f'Amount of captured/constructed structures by the Colonials in {full_hex_name}')
+    for k,v in colonial_icons.items():
+        embed.add_field(name=f'{k}', value=v, inline=True)
+    embed.set_footer(text="End of report")
+    await ctx.send(embed=embed)
 
 # Error handling
 @bot.event

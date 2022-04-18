@@ -36,4 +36,6 @@ class Hexagon:
                 for k,v in all_icons.items():
                     if v is icon:
                         colonial_icons.append(k)
-        return warden_icons, colonial_icons
+        counted_w = Counter(warden_icons)
+        counted_c = Counter(colonial_icons)
+        return counted_w, counted_c
