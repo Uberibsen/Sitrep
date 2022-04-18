@@ -24,6 +24,9 @@ async def report(ctx):
         data = json.load(api_url)
         api = data['shards'][0]['url']
         api_response = API.get_war_report(api)
+        if api_response is False:
+            raise commands.CommandError()
+
     war_number = api_response["warNumber"]
     days_at_war, enlistments, warden_casualties, colonial_casualties = API.get_total_casualties(api)
 
@@ -47,7 +50,8 @@ async def hex(ctx, hex_name):
             await ctx.send(f'Hex identified: {full_hex_name}.\nGathering intel...')
             enlistments, warden_casualties, colonial_casualties = API.get_hex_info(api, hex_name)
         else:
-            raise commands.BadArgument()
+            raise commands.CommandError()
+
     # Embed formatting
     embed=discord.Embed(title=f"{full_hex_name} status report", description="Amount of casualties, enlistments and war duration")
     embed.add_field(name="Enlistments", value=str("{:,}".format(enlistments)), inline=False)
@@ -56,6 +60,21 @@ async def hex(ctx, hex_name):
     embed.set_footer(text="End of report")
     await ctx.send(embed=embed)
 
+@bot.command(name = "captures")
+async def captures(ctx, hex_name):
+    await ctx.send("Command received! Gathering intel...")
+    with open("constants\shards.json", "r") as api_url:
+        data = json.load(api_url)
+        api = data['shards'][0]['url']
+        hex_name = Hexagon.search_hex_name(hex_name)
+        if hex_name:
+            full_hex_name = Hexagon.split_hex_name(hex_name)
+            await ctx.send(f'Hex identified: {full_hex_name}.\nGathering intel...')
+        else:
+            raise commands.CommandError()
+        territory = API.get_captured_structures(api, hex_name)
+        warden_icons, colonial_icons = Hexagon.decipher_icon_type(territory)
+
 # Error handling
 @bot.event
 async def on_command_error(ctx, error):
@@ -63,6 +82,8 @@ async def on_command_error(ctx, error):
 
     if isinstance(error, commands.CommandNotFound):
         message = "This command does not exist."
+    elif isinstance(error, commands.CommandError):
+        message = "Failed to receive data. Try again in a few minutes."
     elif isinstance(error, commands.CommandOnCooldown):
         message = f"This command is on cooldown. Please try again after {round(error.retry_after, 1)} seconds."
     elif isinstance(error, commands.MissingPermissions):

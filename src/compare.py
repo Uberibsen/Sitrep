@@ -1,4 +1,5 @@
 import json, re
+from collections import Counter
 
 class Hexagon:
     def search_hex_name(message):      
@@ -21,3 +22,18 @@ class Hexagon:
             hex_split.pop()
         full_hex_name = ' '.join(hex_split)
         return full_hex_name
+
+    def decipher_icon_type(response):
+        warden_icons, colonial_icons = ([] for i in range(2))
+
+        with open('constants\map_icons.json', 'r') as map_icons:
+            all_icons = json.load(map_icons)
+            for icon in response["wardens"]:
+                for k,v in all_icons.items():
+                    if v is icon:
+                        warden_icons.append(k)
+            for icon in response["colonials"]:
+                for k,v in all_icons.items():
+                    if v is icon:
+                        colonial_icons.append(k)
+        return warden_icons, colonial_icons
